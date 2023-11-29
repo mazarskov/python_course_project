@@ -1,1 +1,1 @@
-#used for clean project code
+#used for clean project front-end code
