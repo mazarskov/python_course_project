@@ -2,16 +2,23 @@
 
 import customtkinter as ctk
 from functions import *
+from tkinter import messagebox
 
 def print_all(): #this is for testing only, not to be used in final project
     user_pass_num = pass_input_field.get()
     user_name = name_input_field.get()
-    user_nationality = country_input_field.get()
+    user_country = country_input_field.get()
     user_gender = gender_var.get()
     user_housing = housing_option.get()
-    user_from_country = from_country_input_field.get()
-    user_to_country = to_country_input_field.get()
-    text = generate_text(user_name, user_gender, user_nationality, user_pass_num, user_housing, user_from_country, user_to_country)
+    user_from_date = from_date_input_field.get()
+    user_to_date = to_date_input_field.get()
+    valid_date_from = is_valid_date(user_from_date)
+    valid_date_to = is_valid_date(user_to_date)
+    if valid_date_from == False:
+        user_from_date = "Not right date format, must be DD/MM/YYYY"
+    if valid_date_to == False:
+        user_to_date = "Not right date format, must be DD/MM/YYYY"
+    text = generate_text(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
     #display_box.delete("0.0", "500.0")
     display_box.insert("0.0", text)
 
@@ -21,9 +28,16 @@ def export_csv():
     user_nationality = country_input_field.get()
     user_gender = gender_var.get()
     user_housing = housing_option.get()
-    user_from_country = from_country_input_field.get()
-    user_to_country = to_country_input_field.get()
-    generate_csv(user_name, user_gender, user_nationality, user_pass_num, user_housing, user_from_country, user_to_country)
+    user_from_date = from_date_input_field.get()
+    user_to_date = to_date_input_field.get()
+    valid_date_from = is_valid_date(user_from_date)
+    valid_date_to = is_valid_date(user_to_date)
+    if valid_date_from == False or valid_date_to == False:
+        messagebox.showinfo("CSV export failed", "CSV export failed because date was not DD/MM/YYYY")
+    else:
+        generate_csv(user_name, user_gender, user_nationality, user_pass_num, user_housing, user_from_date, user_to_date)
+
+    
 
 
 #UNFINISHED
@@ -76,14 +90,14 @@ female.place(relx = 0.7, rely = 0.4, anchor=ctk.W)
 no_gender = ctk.CTkRadioButton(frame, text="Prefer not to say", variable=gender_var, value="NaN")
 no_gender.place(relx = 0.8, rely = 0.4, anchor=ctk.W)
 
-from_label= ctk.CTkLabel(frame, text="Flying from", fg_color="transparent", font=('Arial', 15))
+from_label= ctk.CTkLabel(frame, text="From", fg_color="transparent", font=('Arial', 15))
 from_label.place(relx = 0.05, rely = 0.6, anchor=ctk.W)
-from_country_input_field = ctk.CTkEntry(frame, placeholder_text="Type country here", width=300)
-from_country_input_field.place(relx = 0.13, rely = 0.6, anchor=ctk.W)
+from_date_input_field = ctk.CTkEntry(frame, placeholder_text="Type from date here", width=300)
+from_date_input_field.place(relx = 0.13, rely = 0.6, anchor=ctk.W)
 to_label = ctk.CTkLabel(frame, text="to", fg_color="transparent", font=('Arial', 15))
 to_label.place(relx = 0.452, rely = 0.6, anchor=ctk.W)
-to_country_input_field = ctk.CTkEntry(frame, placeholder_text="Type destination country here", width=300)
-to_country_input_field.place(relx = 0.47, rely = 0.6, anchor=ctk.W)
+to_date_input_field = ctk.CTkEntry(frame, placeholder_text="Type to date here", width=300)
+to_date_input_field.place(relx = 0.47, rely = 0.6, anchor=ctk.W)
 
 housing_option_label = ctk.CTkLabel(frame, text="Accomodation type", fg_color="transparent", font=('Arial', 15))
 housing_option_label.place(relx = 0.05, rely = 0.8, anchor=ctk.W)
