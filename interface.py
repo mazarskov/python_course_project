@@ -37,6 +37,27 @@ def export_csv():
     else:
         generate_csv(user_name, user_gender, user_nationality, user_pass_num, user_housing, user_from_date, user_to_date)
 
+def add_to_database():
+    user_pass_num = pass_input_field.get()
+    user_name = name_input_field.get()
+    user_nationality = country_input_field.get()
+    user_gender = gender_var.get()
+    user_housing = housing_option.get()
+    user_from_date = from_date_input_field.get()
+    user_to_date = to_date_input_field.get()
+    valid_date_from = is_valid_date(user_from_date)
+    valid_date_to = is_valid_date(user_to_date)
+
+    #csv_values = [[name, gender, nationality, pass_num, housing, from_country, to_country]]
+    
+    if valid_date_from == False or valid_date_to == False:
+        messagebox.showinfo("SQL add failed", "SQL add failed because date was not DD/MM/YYYY")
+    else:
+        converted_from_date = datetime.strptime(user_from_date, '%d/%m/%Y').strftime('%Y-%m-%d')
+        converted_to_date = datetime.strptime(user_to_date, '%d/%m/%Y').strftime('%Y-%m-%d')
+        values = [user_name, user_gender, user_nationality, user_pass_num, user_housing, converted_from_date, converted_to_date]
+        append_values_to_database(values)
+
     
 
 
@@ -111,6 +132,9 @@ random_ass_button.place(relx = 0.8, rely = 0.8, anchor=ctk.W)
 
 export_to_csv_button = ctk.CTkButton(frame, text="Export to csv", command=export_csv)
 export_to_csv_button.place(relx = 0.55, rely = 0.8, anchor=ctk.W)
+
+SQL_button = ctk.CTkButton(app, text="ADD TO DATABASE", command=add_to_database)
+SQL_button.place(relx = 0.8, rely = 0.4, anchor=ctk.W)
 
 display_box = ctk.CTkTextbox(app, width=500, height=300)
 display_box.place(relx = 0.025, rely = 0.55, anchor=ctk.W)

@@ -2,12 +2,20 @@
 import csv
 import os
 from datetime import datetime
+import mysql.connector
+database_config = {
+    'host': 'localhost',
+    'user': 'root',
+    'password': 'Maksim2010',
+    'database': 'users'
+}
+
 
 def exit_app():
     exit()
 
 def generate_text(user_name, user_gender, user_nationality, user_pass_num, user_housing, user_from_country, user_to_country):
-    text = f"\nName: {user_name}\nGender: {user_gender}\nCountry: {user_nationality}\nPassport_num: {user_pass_num}\nHousing option: {user_housing}\nDate from: {user_from_country}\nDate to: {user_to_country}"
+    text = f"\nName: {user_name}\nGender: {user_gender}\nCountry: {user_nationality}\nPassport_num: {user_pass_num}\nHousing option: {user_housing}\nDate from: {type(user_from_country)}\nDate to: {user_to_country}"
     return text
 
 def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_country):
@@ -25,9 +33,40 @@ def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_
 
 def is_valid_date(date_string):
     try:
-        # Attempt to parse the input string as a date in the DD/MM/YYYY format
         datetime.strptime(date_string, '%d/%m/%Y')
         return True
     except ValueError:
-        # If parsing fails, the input is not in the correct format
         return False
+    
+
+def append_values_to_database(values, database_config=database_config):
+    try:
+        # Connect to the MySQL database
+        connection = mysql.connector.connect(**database_config)
+        cursor = connection.cursor()
+
+        # Insert data into the database
+        query = """
+            INSERT INTO users (name, gender, country, pass_num, housing, date_from, date_to)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(query, values)
+
+        # Commit the changes and close the connection
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        print("Data appended to the database successfully.")
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+
+def convert_to_mysql_date(date_str):
+    # Convert 'DD/MM/YYYY' to 'YYYY-MM-DD'
+    try:
+        date_object = datetime.strptime(date_str, '%d/%m/%Y')
+        return date_object.strftime('%Y-%m-%d')
+    except ValueError:
+        return None
