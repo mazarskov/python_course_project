@@ -18,9 +18,12 @@ def print_all(): #this is for testing only, not to be used in final project
         user_from_date = "Not right date format, must be DD/MM/YYYY"
     if valid_date_to == False:
         user_to_date = "Not right date format, must be DD/MM/YYYY"
-    text = generate_text(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
+    #text = generate_text(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
+    text = return_values_from_database()
     #display_box.delete("0.0", "500.0")
     display_box.insert("0.0", text)
+    display_box.insert("0.0", "\n")
+    
 
 def export_csv():
     user_pass_num = pass_input_field.get()

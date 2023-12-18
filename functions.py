@@ -70,3 +70,47 @@ def convert_to_mysql_date(date_str):
         return date_object.strftime('%Y-%m-%d')
     except ValueError:
         return None
+    
+def print_values_from_database(database_config=database_config):
+    try:
+        # Connect to the MySQL database
+        connection = mysql.connector.connect(**database_config)
+        cursor = connection.cursor()
+
+        # Get data from the database
+        query = """
+            SELECT * FROM users
+        """
+        cursor.execute(query)
+        records = cursor.fetchall()
+        for row in records:
+            print(row)
+
+        # Close the connection
+        cursor.close()
+        connection.close()
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+def return_values_from_database(database_config=database_config):
+    try:
+        # Connect to the MySQL database
+        connection = mysql.connector.connect(**database_config)
+        cursor = connection.cursor()
+
+        # Get data from the database
+        query = """
+            SELECT * FROM users
+        """
+        cursor.execute(query)
+        records = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return records
+
+        # Close the connection
+        
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
