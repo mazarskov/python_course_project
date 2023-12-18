@@ -3,10 +3,12 @@ import csv
 import os
 from datetime import datetime
 import mysql.connector
+from pprint import pprint
+from pprint import pformat
 database_config = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'CHANGE MEEEEEE',
+    'password': 'python_course_pass',
     'database': 'users'
 }
 
@@ -15,7 +17,7 @@ def exit_app():
     exit()
 
 def generate_text(user_name, user_gender, user_nationality, user_pass_num, user_housing, user_from_country, user_to_country):
-    text = f"\nName: {user_name}\nGender: {user_gender}\nCountry: {user_nationality}\nPassport_num: {user_pass_num}\nHousing option: {user_housing}\nDate from: {type(user_from_country)}\nDate to: {user_to_country}"
+    text = f"\nName: {user_name}\nGender: {user_gender}\nCountry: {user_nationality}\nPassport_num: {user_pass_num}\nHousing option: {user_housing}\nDate from: {user_from_country}\nDate to: {user_to_country}"
     return text
 
 def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_country):
@@ -30,6 +32,12 @@ def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_
             csvwriter.writerow(header)
         csvwriter.writerows(csv_values)
 
+
+def format_records(records):
+    formatted_text = ""
+    for record in records:
+        formatted_text += pformat(record, width=1) + "\n\n"
+    return formatted_text
 
 def is_valid_date(date_string):
     try:
@@ -71,27 +79,7 @@ def convert_to_mysql_date(date_str):
     except ValueError:
         return None
     
-def print_values_from_database(database_config=database_config):
-    try:
-        # Connect to the MySQL database
-        connection = mysql.connector.connect(**database_config)
-        cursor = connection.cursor()
 
-        # Get data from the database
-        query = """
-            SELECT * FROM users
-        """
-        cursor.execute(query)
-        records = cursor.fetchall()
-        for row in records:
-            print(row)
-
-        # Close the connection
-        cursor.close()
-        connection.close()
-
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
 
 def return_values_from_database(database_config=database_config):
     try:
@@ -104,13 +92,16 @@ def return_values_from_database(database_config=database_config):
             SELECT * FROM users
         """
         cursor.execute(query)
+        column_names = [i[0] for i in cursor.description]
         records = cursor.fetchall()
+
+        # Format the data
+        formatted_records = [dict(zip(column_names, record)) for record in records]
+
         cursor.close()
         connection.close()
-        return records
 
-        # Close the connection
-        
+        return formatted_records
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
