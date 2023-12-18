@@ -36,7 +36,13 @@ def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_
 def format_records(records):
     formatted_text = ""
     for record in records:
-        formatted_text += pformat(record, width=1) + "\n\n"
+        formatted_text += f"\nName: {record['name']}"
+        formatted_text += f"\nGender: {record['gender']}"
+        formatted_text += f"\nCountry: {record['country']}"
+        formatted_text += f"\nPassport Number: {record['pass_num']}"
+        formatted_text += f"\nHousing: {record['housing']}"
+        formatted_text += f"\nDate From: {record['date_from']}"
+        formatted_text += f"\nDate To: {record['date_to']}\n"
     return formatted_text
 
 def is_valid_date(date_string):
