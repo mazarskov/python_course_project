@@ -19,9 +19,9 @@ def generate_text(user_name, user_gender, user_nationality, user_pass_num, user_
     text = f"\nName: {user_name}\nGender: {user_gender}\nCountry: {user_nationality}\nPassport_num: {user_pass_num}\nHousing option: {user_housing}\nDate from: {user_from_country}\nDate to: {user_to_country}"
     return text
 
-def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_country):
-    header = ["Name", "Gender", "Country", "Pass_Num", "Housing", "Date_from", "Date_to"]
-    csv_values = [[name, gender, nationality, pass_num, housing, from_country, to_country]]
+def generate_csv(list):
+    header = ["id", "Name", "Gender", "Country", "Pass_Num", "Housing", "Date_from", "Date_to"]
+    csv_values = [list]
     filename = "test_output.csv"
     file_empty = not os.path.exists(filename) or not os.path.getsize(filename)
     print(file_empty)
@@ -134,6 +134,36 @@ def delete_user_info(user_id, database_config=database_config):
         connection.close()
 
         print(f"User with user_id {user_id} deleted successfully.")
+
+    except sqlite3.Error as err:
+        print(f"Error: {err}")
+
+def update_user_info(user_id, new_values, database_config=database_config):
+    try:
+        
+        # Connect to the SQLite database
+        connection = sqlite3.connect(database_config['database'])
+        cursor = connection.cursor()
+
+        # Construct the UPDATE query
+        query = """
+            UPDATE users
+            SET name = ?, gender = ?, country = ?, pass_num = ?, housing = ?, date_from = ?, date_to = ?
+            WHERE user_id = ?
+        """
+
+        # Include the new values and user_id in the query
+        updated_values = new_values + (user_id,)
+
+        # Execute the query
+        cursor.execute(query, updated_values)
+
+        # Commit the changes and close the connection
+        connection.commit()
+        cursor.close()
+        connection.close()
+
+        print(f"User with user_id {user_id} updated successfully.")
 
     except sqlite3.Error as err:
         print(f"Error: {err}")

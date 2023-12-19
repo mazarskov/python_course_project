@@ -29,7 +29,6 @@ def print_all():
     user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
     text = generate_text(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
     text2 = return_values_from_database()
-    formatted_text = format_records(text2)
     listbox.delete(0, tk.END)
     for list in text2:
         listbox.insert(tk.END, list)
@@ -37,11 +36,17 @@ def print_all():
 
 
 def export_csv():
-    user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
-    if not valid_date_from or not valid_date_to:
-        messagebox.showinfo("CSV export failed", "CSV export failed because date was not DD/MM/YYYY")
+    list_of_users = []
+    list_of_users = return_values_from_database()
+    if list_of_users == []:
+        messagebox.showinfo("Database empty", "Database empty, nothing to export")
     else:
-        generate_csv(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
+        for list in list_of_users:
+            generate_csv(list)
+        messagebox.showinfo("Success", "CSV file successfully generated")
+    
+    
+
 
 def add_to_database():
     user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
@@ -76,35 +81,6 @@ def create_housing_option(values):
     housing_option = ctk.CTkOptionMenu(frame, values=values, width=300)
     housing_option.place(relx=0.2, rely=0.8, anchor=ctk.W)
 
-def update_user_info(user_id, new_values, database_config=database_config):
-    try:
-        
-        # Connect to the SQLite database
-        connection = sqlite3.connect(database_config['database'])
-        cursor = connection.cursor()
-
-        # Construct the UPDATE query
-        query = """
-            UPDATE users
-            SET name = ?, gender = ?, country = ?, pass_num = ?, housing = ?, date_from = ?, date_to = ?
-            WHERE user_id = ?
-        """
-
-        # Include the new values and user_id in the query
-        updated_values = new_values + (user_id,)
-
-        # Execute the query
-        cursor.execute(query, updated_values)
-
-        # Commit the changes and close the connection
-        connection.commit()
-        cursor.close()
-        connection.close()
-
-        print(f"User with user_id {user_id} updated successfully.")
-
-    except sqlite3.Error as err:
-        print(f"Error: {err}")
 
 
 def update_entry():
@@ -209,6 +185,10 @@ app.config(menu=menu_bar)
 developers_menu = tk.Menu(menu_bar, tearoff=0)
 developers_menu.add_command(label="Show developer info", command=lambda: messagebox.showinfo("Developers", "Maksim"))
 
+file_menu = tk.Menu(menu_bar, tearoff=0)
+file_menu.add_command(label="Export to .CSV", command=export_csv)
+
+menu_bar.add_cascade(label="File", menu=file_menu)
 menu_bar.add_cascade(label="Developers", menu=developers_menu)
 exit_button = ctk.CTkButton(app, text="Exit", command=exit_app, width=200)
 exit_button.place(relx=0.87, rely=0.9, anchor=ctk.CENTER) 
@@ -257,7 +237,7 @@ button_data = [
     {"parent": app, "text": "(NOT WORK)Search entry", "command": print_all, "relx": 0.8, "rely": 0.45},
     {"parent": app, "text": "View all entries", "command": print_all, "relx": 0.8, "rely": 0.5},
     {"parent": app, "text": "Delete selected entry", "command": delete_entry, "relx": 0.8, "rely": 0.55},
-    {"parent": app, "text": "Export to csv", "command": export_csv, "relx": 0.005, "rely": 0.05}, 
+    #{"parent": app, "text": "Export to csv", "command": export_csv, "relx": 0.005, "rely": 0.05}, 
     {"parent": frame, "text": "Book Now", "command": add_to_database, "relx": 0.8, "rely": 0.8},
     {"parent": app, "text": "Clear all fields", "command": clear_fields, "relx": 0.8, "rely": 0.7}
 ]
