@@ -22,6 +22,13 @@ def get_and_validate_user_input():
         user_from_date = "Not right date format, must be DD/MM/YYYY"
     if not valid_date_to:
         user_to_date = "Not right date format, must be DD/MM/YYYY"
+    if user_pass_num == "":
+        user_pass_num = None
+    if user_name == "":
+        user_name = None
+    if user_country == "":
+        user_country = None
+    
 
     return user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to
 
@@ -113,6 +120,18 @@ def refresh_entries_list():
     for list in entries:
         listbox.insert(tk.END, list)
 
+def ouput_filtered_list():
+    listbox.delete(0, tk.END)
+    # Fetch and display the updated list of entries
+    entries = search_entries()
+    if entries == None:
+        messagebox.showinfo("Search failed", "Search failed because no entries were found")
+    
+    else:
+        listbox.delete(0, tk.END)
+        for list in entries:
+            listbox.insert(tk.END, list)
+
 def clear_fields():
     global chosen_id
     to_date_input_field.delete(0, tk.END)
@@ -126,37 +145,28 @@ def clear_fields():
 
 def search_entries():
     # Get values from Tkinter fields
-    user_pass_num = pass_input_field.get()
-    user_name = name_input_field.get()
-    user_country = country_input_field.get()
-    user_gender = gender_var.get()
-    user_housing = housing_option.get()
-    user_from_date = from_date_input_field.get()
-    user_to_date = to_date_input_field.get()
-    valid_date_from = is_valid_date(user_from_date)
-    valid_date_to = is_valid_date(user_to_date)
-
+    user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
+    condition = []
     # Construct the WHERE clause for the SQL query based on the entered values
-    conditions = []
     if user_name:
-        conditions.append(f"name = '{user_name}'")
-    if user_gender:
-        conditions.append(f"gender = '{user_gender}'")
+        condition.append(f"name = '{user_name}'")
+    #if user_gender:
+        #condition.append(f"gender = '{user_gender}'")
     if user_country:
-        conditions.append(f"country = '{user_country}'")
+        condition.append(f"country = '{user_country}'")
     if user_pass_num:
-        conditions.append(f"pass_num = '{user_pass_num}'")
-    if user_housing:
-        conditions.append(f"housing = '{user_housing}'")
-    if user_from_date:
-        conditions.append(f"date_from = '{user_from_date}'")
-    if user_to_date:
-        conditions.append(f"date_to = '{user_to_date}'")
-
+        condition.append(f"pass_num = '{user_pass_num}'")
+    #if user_housing:
+        #condition.append(f"housing = '{user_housing}'")
+    if valid_date_from:
+        condition.append(f"date_from = '{user_from_date}'")
+    if valid_date_to:
+        condition.append(f"date_to = '{user_to_date}'")
     # Construct the SQL query
     query = "SELECT * FROM users"
-    if conditions:
-        query += " WHERE " + " AND ".join(conditions)
+    #condition = "gender = 'Male'"
+    if condition:
+        query += " WHERE " + " AND ".join(condition)
 
         connection = sqlite3.connect(database_config['database'])
         cursor = connection.cursor()
@@ -167,14 +177,17 @@ def search_entries():
 
         # Execute the query
         cursor.execute(query)
-
+        records = cursor.fetchall()
         # Commit the changes and close the connection
         connection.commit()
         cursor.close()
         connection.close()
+        print(records)
+        print(query)
+        return records
     # Fetch and display the matching entries
-    entries = return_values_from_database(query)
-    refresh_entries_list(entries)
+   
+    
 
 
 
@@ -193,7 +206,7 @@ menu_bar = tk.Menu(app)
 app.config(menu=menu_bar)
 
 developers_menu = tk.Menu(menu_bar, tearoff=0)
-developers_menu.add_command(label="Show developer info", command=lambda: messagebox.showinfo("Developers", "Maksim"))
+developers_menu.add_command(label="Show developer info", command=lambda: messagebox.showinfo("Developers", "Maksim Azarskov and Amberleigh Wankel"))
 
 file_menu = tk.Menu(menu_bar, tearoff=0)
 file_menu.add_command(label="Export to .CSV", command=export_csv)
@@ -238,13 +251,13 @@ to_date_input_field.place(relx = 0.47, rely = 0.6, anchor=ctk.W)
 
 housing_option_label = ctk.CTkLabel(frame, text="Accomodation type", fg_color="transparent", font=('Arial', 15))
 housing_option_label.place(relx = 0.05, rely = 0.8, anchor=ctk.W)
-housing_option = ctk.CTkOptionMenu(frame, values=["Female dorm", "Male dorm"], width=300)
+housing_option = ctk.CTkOptionMenu(frame, values=["Female_dorm", "Male_dorm"], width=300)
 housing_option.place(relx = 0.2, rely = 0.8, anchor=ctk.W)
 
 
 button_data = [
     {"parent": app, "text": "Update entry", "command": update_entry, "relx": 0.8, "rely": 0.4},
-    {"parent": app, "text": "(NOT WORK)Search entry", "command": search_entries, "relx": 0.8, "rely": 0.45},
+    {"parent": app, "text": "Search entry", "command": ouput_filtered_list, "relx": 0.8, "rely": 0.45},
     {"parent": app, "text": "View all entries", "command": print_all, "relx": 0.8, "rely": 0.5},
     {"parent": app, "text": "Delete selected entry", "command": delete_entry, "relx": 0.8, "rely": 0.55},
     #{"parent": app, "text": "Export to csv", "command": export_csv, "relx": 0.005, "rely": 0.05}, 

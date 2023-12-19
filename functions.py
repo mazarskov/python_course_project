@@ -22,13 +22,17 @@ def generate_text(user_name, user_gender, user_nationality, user_pass_num, user_
 def generate_csv(list):
     header = ["id", "Name", "Gender", "Country", "Pass_Num", "Housing", "Date_from", "Date_to"]
     csv_values = [list]
-    filename = "test_output.csv"
-    file_empty = not os.path.exists(filename) or not os.path.getsize(filename)
-    print(file_empty)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"output_{timestamp}.csv"
+    file_empty = not os.path.exists(filename) or os.path.getsize(filename) == 0
+
     with open(filename, "a", newline="") as file:
         csvwriter = csv.writer(file)
+        
+        # Write the header only if the file is empty
         if file_empty:
             csvwriter.writerow(header)
+
         csvwriter.writerows(csv_values)
 
 
