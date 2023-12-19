@@ -17,7 +17,6 @@ def get_and_validate_user_input():
     user_to_date = to_date_input_field.get()
     valid_date_from = is_valid_date(user_from_date)
     valid_date_to = is_valid_date(user_to_date)
-
     if not valid_date_from:
         user_from_date = "Not right date format, must be DD/MM/YYYY"
     if not valid_date_to:
@@ -28,7 +27,6 @@ def get_and_validate_user_input():
         user_name = None
     if user_country == "":
         user_country = None
-
     return user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to
 
 
@@ -65,7 +63,6 @@ def add_to_database():
 
 def update_housing_options(*args):
     selected_gender = gender_var.get()
-
     new_values = []
     if selected_gender == "Male":
         new_values = ["Male_dorm"]
@@ -73,7 +70,6 @@ def update_housing_options(*args):
         new_values = ["Female_dorm"]
     else:
         new_values = ["Male_dorm", "Female_dorm"]
-
     housing_option.destroy()
     create_housing_option(new_values)
 
@@ -120,7 +116,6 @@ def ouput_filtered_list():
     entries = search_entries()
     if entries == None:
         messagebox.showinfo("Search failed", "Search failed because no entries were found")
-    
     else:
         listbox.delete(0, tk.END)
         for list in entries:
@@ -141,7 +136,6 @@ def clear_fields():
 def search_entries():
     user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
     condition = []
-
     if user_name:
         condition.append(f"name = '{user_name}'")
     #if user_gender:
@@ -156,16 +150,12 @@ def search_entries():
         condition.append(f"date_from = '{user_from_date}'")
     if valid_date_to:
         condition.append(f"date_to = '{user_to_date}'")
-
     query = "SELECT * FROM users"
     if condition:
         query += " WHERE " + " AND ".join(condition)
-
         connection = sqlite3.connect(database_config['database'])
         cursor = connection.cursor()
-
         query = query
-
         cursor.execute(query)
         records = cursor.fetchall()
         connection.commit()
@@ -174,11 +164,8 @@ def search_entries():
         return records
 
 def on_select(event):
-    #selected_item = event.widget.get(event.widget.curselection())
-    # Check if an item is selected
     if event.widget.curselection():
         selected_item = event.widget.get(event.widget.curselection())
-        # Now you can use selected_item however you want
         print(f"You selected: {selected_item}")
         selected_id, name, gender, country, pass_num, housing, date_from, date_to = selected_item
         global chosen_id
