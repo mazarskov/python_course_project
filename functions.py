@@ -2,14 +2,13 @@
 import csv
 import os
 from datetime import datetime
-import mysql.connector
 from pprint import pprint
 from pprint import pformat
+import customtkinter as ctk
+from tkinter import messagebox
+import sqlite3
 database_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': 'python_course_pass',
-    'database': 'users'
+    'database': 'users.db'
 }
 
 
@@ -36,8 +35,20 @@ def generate_csv(name, gender, nationality, pass_num, housing, from_country, to_
 def format_records(records):
     formatted_text = ""
     for record in records:
-        formatted_text += pformat(record, width=1) + "\n\n"
+        if isinstance(record, dict):
+            formatted_text += f"\nName: {record.get('name', 'N/A')}"
+            formatted_text += f"\nGender: {record.get('gender', 'N/A')}"
+            formatted_text += f"\nCountry: {record.get('country', 'N/A')}"
+            formatted_text += f"\nPassport Number: {record.get('pass_num', 'N/A')}"
+            formatted_text += f"\nHousing: {record.get('housing', 'N/A')}"
+            formatted_text += f"\nDate From: {record.get('date_from', 'N/A')}"
+            formatted_text += f"\nDate To: {record.get('date_to', 'N/A')}"
+            formatted_text += "----------------"
+        else:
+            formatted_text += f"\nUnexpected record format: {record}"
     return formatted_text
+
+
 
 def is_valid_date(date_string):
     try:
@@ -49,14 +60,14 @@ def is_valid_date(date_string):
 
 def append_values_to_database(values, database_config=database_config):
     try:
-        # Connect to the MySQL database
-        connection = mysql.connector.connect(**database_config)
+        # Connect to the SQLite database
+        connection = sqlite3.connect(database_config['database'])
         cursor = connection.cursor()
 
         # Insert data into the database
         query = """
             INSERT INTO users (name, gender, country, pass_num, housing, date_from, date_to)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """
         cursor.execute(query, values)
 
@@ -67,10 +78,10 @@ def append_values_to_database(values, database_config=database_config):
 
         print("Data appended to the database successfully.")
 
-    except mysql.connector.Error as err:
+    except sqlite3.Error as err:
         print(f"Error: {err}")
 
-
+'''
 def convert_to_mysql_date(date_str):
     # Convert 'DD/MM/YYYY' to 'YYYY-MM-DD'
     try:
@@ -78,13 +89,13 @@ def convert_to_mysql_date(date_str):
         return date_object.strftime('%Y-%m-%d')
     except ValueError:
         return None
-    
+'''
 
 
 def return_values_from_database(database_config=database_config):
     try:
-        # Connect to the MySQL database
-        connection = mysql.connector.connect(**database_config)
+        # Connect to the SQLite database
+        connection = sqlite3.connect(database_config['database'])
         cursor = connection.cursor()
 
         # Get data from the database
@@ -92,16 +103,37 @@ def return_values_from_database(database_config=database_config):
             SELECT * FROM users
         """
         cursor.execute(query)
-        column_names = [i[0] for i in cursor.description]
         records = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        return records
 
-        # Format the data
-        formatted_records = [dict(zip(column_names, record)) for record in records]
+    except sqlite3.Error as err:
+        print(f"Error: {err}")
 
+
+
+def delete_user_info(user_id, database_config=database_config):
+    try:
+        # Connect to the SQLite database
+        connection = sqlite3.connect(database_config['database'])
+        cursor = connection.cursor()
+
+        # Construct the DELETE query
+        query = """
+            DELETE FROM users
+            WHERE user_id = ?
+        """
+
+        # Execute the query
+        cursor.execute(query, (user_id,))
+
+        # Commit the changes and close the connection
+        connection.commit()
         cursor.close()
         connection.close()
 
-        return formatted_records
+        print(f"User with user_id {user_id} deleted successfully.")
 
-    except mysql.connector.Error as err:
+    except sqlite3.Error as err:
         print(f"Error: {err}")
