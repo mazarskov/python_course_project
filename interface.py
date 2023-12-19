@@ -4,7 +4,7 @@ import customtkinter as ctk
 from functions import *
 from tkinter import messagebox
 import tkinter as tk
-from tkinter import ttk, filedialog
+from tkinter import ttk
 
 chosen_id = None
 def get_and_validate_user_input():
@@ -28,9 +28,9 @@ def get_and_validate_user_input():
         user_name = None
     if user_country == "":
         user_country = None
-    
 
     return user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to
+
 
 def print_all():
     user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
@@ -41,7 +41,6 @@ def print_all():
         listbox.insert(tk.END, list)
     
 
-
 def export_csv():
     list_of_users = []
     list_of_users = return_values_from_database()
@@ -51,8 +50,6 @@ def export_csv():
         for list in list_of_users:
             generate_csv(list)
         messagebox.showinfo("Success", "CSV file successfully generated")
-    
-    
 
 
 def add_to_database():
@@ -60,14 +57,12 @@ def add_to_database():
     if not valid_date_from or not valid_date_to:
         messagebox.showinfo("SQL add failed", "SQL add failed because date was not DD/MM/YYYY")
     else:
-        converted_from_date = datetime.strptime(user_from_date, '%d/%m/%Y').strftime('%Y-%m-%d')
-        converted_to_date = datetime.strptime(user_to_date, '%d/%m/%Y').strftime('%Y-%m-%d')
         values = [user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date]
         append_values_to_database(values)
         messagebox.showinfo("Success", "Information successfully added to database")
         refresh_entries_list()
 
-    
+
 def update_housing_options(*args):
     selected_gender = gender_var.get()
 
@@ -79,15 +74,14 @@ def update_housing_options(*args):
     else:
         new_values = ["Male_dorm", "Female_dorm"]
 
-    # Destroy the existing housing_option and create a new one with updated values
     housing_option.destroy()
     create_housing_option(new_values)
+
 
 def create_housing_option(values):
     global housing_option
     housing_option = ctk.CTkOptionMenu(frame, values=values, width=300)
     housing_option.place(relx=0.2, rely=0.8, anchor=ctk.W)
-
 
 
 def update_entry():
@@ -98,10 +92,10 @@ def update_entry():
     elif not valid_date_from or not valid_date_to:
         messagebox.showinfo("Update failed", "Update failed because date was not DD/MM/YYYY")
     else:
-        # Call the update_user_info function with the new values
         new_values = (user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
         update_user_info(user_id, new_values)
         refresh_entries_list()
+        messagebox.showinfo("Success", "Information successfully updated")
 
 
 def delete_entry():
@@ -112,17 +106,17 @@ def delete_entry():
     else:
         messagebox.showinfo("Delete failed", "Delete failed because no entry was selected")
 
+
 def refresh_entries_list():
     listbox.delete(0, tk.END)
-    # Fetch and display the updated list of entries
     entries = return_values_from_database()
     listbox.delete(0, tk.END)
     for list in entries:
         listbox.insert(tk.END, list)
 
+
 def ouput_filtered_list():
     listbox.delete(0, tk.END)
-    # Fetch and display the updated list of entries
     entries = search_entries()
     if entries == None:
         messagebox.showinfo("Search failed", "Search failed because no entries were found")
@@ -131,6 +125,7 @@ def ouput_filtered_list():
         listbox.delete(0, tk.END)
         for list in entries:
             listbox.insert(tk.END, list)
+
 
 def clear_fields():
     global chosen_id
@@ -144,51 +139,62 @@ def clear_fields():
 
 
 def search_entries():
-    # Get values from Tkinter fields
     user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
     condition = []
-    # Construct the WHERE clause for the SQL query based on the entered values
+
     if user_name:
         condition.append(f"name = '{user_name}'")
     #if user_gender:
-        #condition.append(f"gender = '{user_gender}'")
+        #condition.append(f"gender = '{user_gender}'") ----------------- This is disabled due to how the functionality of search is built
     if user_country:
         condition.append(f"country = '{user_country}'")
     if user_pass_num:
         condition.append(f"pass_num = '{user_pass_num}'")
     #if user_housing:
-        #condition.append(f"housing = '{user_housing}'")
+        #condition.append(f"housing = '{user_housing}'") ----------------- This is disabled due to how the functionality of search is built
     if valid_date_from:
         condition.append(f"date_from = '{user_from_date}'")
     if valid_date_to:
         condition.append(f"date_to = '{user_to_date}'")
-    # Construct the SQL query
+
     query = "SELECT * FROM users"
-    #condition = "gender = 'Male'"
     if condition:
         query += " WHERE " + " AND ".join(condition)
 
         connection = sqlite3.connect(database_config['database'])
         cursor = connection.cursor()
 
-        # Construct the UPDATE query
         query = query
-        # Include the new values and user_id in the query
 
-        # Execute the query
         cursor.execute(query)
         records = cursor.fetchall()
-        # Commit the changes and close the connection
         connection.commit()
         cursor.close()
         connection.close()
-        print(records)
-        print(query)
         return records
-    # Fetch and display the matching entries
-   
-    
 
+def on_select(event):
+    selected_item = event.widget.get(event.widget.curselection())
+    print(f"You selected: {selected_item}")
+    selected_id, name, gender, country, pass_num, housing, date_from, date_to = selected_item
+    global chosen_id
+    chosen_id = selected_id
+    from_date_input_field.delete(0, tk.END)
+    from_date_input_field.insert(0, date_from)
+    to_date_input_field.delete(0, tk.END)
+    to_date_input_field.insert(0, date_to)
+    pass_input_field.delete(0, tk.END)
+    pass_input_field.insert(0, pass_num)
+    country_input_field.delete(0, tk.END)
+    country_input_field.insert(0, country)
+    name_input_field.delete(0, tk.END)
+    name_input_field.insert(0, name)
+    if gender == "Male":
+        gender_var.set("Male")
+    elif gender == "Female":
+        gender_var.set("Female")
+    elif gender_var == "Prefer not to say":
+        gender_var.set("NaN")
 
 
 ctk.set_appearance_mode("light")  # Modes: system (default), light, dark
@@ -197,7 +203,6 @@ app = ctk.CTk()  # create CTk window like you do with the Tk window
 app.title("Hotel Booking Management System (Early build)")
 app.geometry("1000x800")
 gender_var = ctk.StringVar()
-
 
 frame = ctk.CTkFrame(app, width=950, height=200, corner_radius=5)
 frame.place(relx=0.5, rely=0.2, anchor=ctk.CENTER)
@@ -260,7 +265,6 @@ button_data = [
     {"parent": app, "text": "Search entry", "command": ouput_filtered_list, "relx": 0.8, "rely": 0.45},
     {"parent": app, "text": "View all entries", "command": print_all, "relx": 0.8, "rely": 0.5},
     {"parent": app, "text": "Delete selected entry", "command": delete_entry, "relx": 0.8, "rely": 0.55},
-    #{"parent": app, "text": "Export to csv", "command": export_csv, "relx": 0.005, "rely": 0.05}, 
     {"parent": frame, "text": "Book Now", "command": add_to_database, "relx": 0.8, "rely": 0.8},
     {"parent": app, "text": "Clear all fields", "command": clear_fields, "relx": 0.8, "rely": 0.7}
 ]
@@ -270,44 +274,11 @@ for data in button_data:
     button.place(relx=data["relx"], rely=data["rely"], anchor=ctk.W)
 
 
-
-
-#display_box = ctk.CTkTextbox(app, width=500, height=300)
-#display_box.place(relx = 0.025, rely = 0.55, anchor=ctk.W)
 style = ttk.Style()
 style.configure("TListbox", background="white", foreground="black")
 listbox = tk.Listbox(app, selectbackground="lightblue", selectforeground="black", bg="white", fg="black", width=60, height=20)
 listbox.pack()
-#listbox = tk.Listbox(app, width=12, height=20)
 listbox.place(relx = 0.005, rely = 0.55, anchor=ctk.W)
-def on_select(event):
-    # Note that you have to use event.widget to refer to the listbox
-    selected_item = event.widget.get(event.widget.curselection())
-    print(f"You selected: {selected_item}")
-    selected_id, name, gender, country, pass_num, housing, date_from, date_to = selected_item
-    global chosen_id
-    chosen_id = selected_id
-    print(selected_id)
-    print(name)
-    from_date_input_field.delete(0, tk.END)
-    from_date_input_field.insert(0, date_from)
-    to_date_input_field.delete(0, tk.END)
-    to_date_input_field.insert(0, date_to)
-    pass_input_field.delete(0, tk.END)
-    pass_input_field.insert(0, pass_num)
-    country_input_field.delete(0, tk.END)
-    country_input_field.insert(0, country)
-    name_input_field.delete(0, tk.END)
-    name_input_field.insert(0, name)
-    if gender == "Male":
-        gender_var.set("Male")
-    elif gender == "Female":
-        gender_var.set("Female")
-    elif gender_var == "Prefer not to say":
-        gender_var.set("NaN")
-    
-
-
 listbox.bind('<<ListboxSelect>>', on_select)
 
 gender_var.trace_add('write', update_housing_options)
