@@ -174,27 +174,31 @@ def search_entries():
         return records
 
 def on_select(event):
-    selected_item = event.widget.get(event.widget.curselection())
-    print(f"You selected: {selected_item}")
-    selected_id, name, gender, country, pass_num, housing, date_from, date_to = selected_item
-    global chosen_id
-    chosen_id = selected_id
-    from_date_input_field.delete(0, tk.END)
-    from_date_input_field.insert(0, date_from)
-    to_date_input_field.delete(0, tk.END)
-    to_date_input_field.insert(0, date_to)
-    pass_input_field.delete(0, tk.END)
-    pass_input_field.insert(0, pass_num)
-    country_input_field.delete(0, tk.END)
-    country_input_field.insert(0, country)
-    name_input_field.delete(0, tk.END)
-    name_input_field.insert(0, name)
-    if gender == "Male":
-        gender_var.set("Male")
-    elif gender == "Female":
-        gender_var.set("Female")
-    elif gender_var == "Prefer not to say":
-        gender_var.set("NaN")
+    #selected_item = event.widget.get(event.widget.curselection())
+    # Check if an item is selected
+    if event.widget.curselection():
+        selected_item = event.widget.get(event.widget.curselection())
+        # Now you can use selected_item however you want
+        print(f"You selected: {selected_item}")
+        selected_id, name, gender, country, pass_num, housing, date_from, date_to = selected_item
+        global chosen_id
+        chosen_id = selected_id
+        from_date_input_field.delete(0, tk.END)
+        from_date_input_field.insert(0, date_from)
+        to_date_input_field.delete(0, tk.END)
+        to_date_input_field.insert(0, date_to)
+        pass_input_field.delete(0, tk.END)
+        pass_input_field.insert(0, pass_num)
+        country_input_field.delete(0, tk.END)
+        country_input_field.insert(0, country)
+        name_input_field.delete(0, tk.END)
+        name_input_field.insert(0, name)
+        if gender == "Male":
+            gender_var.set("Male")
+        elif gender == "Female":
+            gender_var.set("Female")
+        elif gender_var == "Prefer not to say":
+            gender_var.set("NaN")
 
 
 ctk.set_appearance_mode("light")  # Modes: system (default), light, dark
