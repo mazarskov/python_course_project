@@ -160,10 +160,6 @@ def search_entries():
     valid_date_from = is_valid_date(user_from_date)
     valid_date_to = is_valid_date(user_to_date)
 
-    if not valid_date_from:
-        user_from_date = "Not right date format, must be DD/MM/YYYY"
-    if not valid_date_to:
-        user_to_date = "Not right date format, must be DD/MM/YYYY"
     # Construct the WHERE clause for the SQL query based on the entered values
     conditions = []
     if user_name:
@@ -186,6 +182,20 @@ def search_entries():
     if conditions:
         query += " WHERE " + " AND ".join(conditions)
 
+        connection = sqlite3.connect(database_config['database'])
+        cursor = connection.cursor()
+
+        # Construct the UPDATE query
+        query = query
+        # Include the new values and user_id in the query
+
+        # Execute the query
+        cursor.execute(query)
+
+        # Commit the changes and close the connection
+        connection.commit()
+        cursor.close()
+        connection.close()
     # Fetch and display the matching entries
     entries = return_values_from_database(query)
     refresh_entries_list(entries)
@@ -254,7 +264,7 @@ housing_option.place(relx = 0.2, rely = 0.8, anchor=ctk.W)
 
 button_data = [
     {"parent": app, "text": "Update entry", "command": update_entry, "relx": 0.8, "rely": 0.4},
-    {"parent": app, "text": "(NOT WORK)Search entry", "command": print_all, "relx": 0.8, "rely": 0.45},
+    {"parent": app, "text": "(NOT WORK)Search entry", "command": search_entries, "relx": 0.8, "rely": 0.45},
     {"parent": app, "text": "View all entries", "command": print_all, "relx": 0.8, "rely": 0.5},
     {"parent": app, "text": "Delete selected entry", "command": delete_entry, "relx": 0.8, "rely": 0.55},
     {"parent": app, "text": "Export to csv", "command": export_csv, "relx": 0.005, "rely": 0.05}, 
