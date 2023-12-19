@@ -30,13 +30,6 @@ def print_all():
     text = generate_text(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
     text2 = return_values_from_database()
     formatted_text = format_records(text2)
-    #display_box.insert("0.0", "\n")
-    #display_box.insert("0.0", formatted_text)
-    #lines = formatted_text.split('----------------')
-    # Add each line as a separate item
-    #for line in lines:
-     #   listbox.insert(tk.END, line)
-    #listbox.insert(tk.END, text2)
     listbox.delete(0, tk.END)
     for list in text2:
         listbox.insert(tk.END, list)
@@ -114,9 +107,6 @@ def update_user_info(user_id, new_values, database_config=database_config):
         print(f"Error: {err}")
 
 
-
-
-
 def update_entry():
     user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date, valid_date_from, valid_date_to = get_and_validate_user_input()
     user_id = chosen_id
@@ -147,6 +137,58 @@ def refresh_entries_list():
     for list in entries:
         listbox.insert(tk.END, list)
 
+def clear_fields():
+    global chosen_id
+    to_date_input_field.delete(0, tk.END)
+    from_date_input_field.delete(0, tk.END)
+    pass_input_field.delete(0, tk.END)
+    country_input_field.delete(0, tk.END)
+    name_input_field.delete(0, tk.END)
+    gender_var.set("NaN")
+    chosen_id = None
+
+
+def search_entries():
+    # Get values from Tkinter fields
+    user_pass_num = pass_input_field.get()
+    user_name = name_input_field.get()
+    user_country = country_input_field.get()
+    user_gender = gender_var.get()
+    user_housing = housing_option.get()
+    user_from_date = from_date_input_field.get()
+    user_to_date = to_date_input_field.get()
+    valid_date_from = is_valid_date(user_from_date)
+    valid_date_to = is_valid_date(user_to_date)
+
+    if not valid_date_from:
+        user_from_date = "Not right date format, must be DD/MM/YYYY"
+    if not valid_date_to:
+        user_to_date = "Not right date format, must be DD/MM/YYYY"
+    # Construct the WHERE clause for the SQL query based on the entered values
+    conditions = []
+    if user_name:
+        conditions.append(f"name = '{user_name}'")
+    if user_gender:
+        conditions.append(f"gender = '{user_gender}'")
+    if user_country:
+        conditions.append(f"country = '{user_country}'")
+    if user_pass_num:
+        conditions.append(f"pass_num = '{user_pass_num}'")
+    if user_housing:
+        conditions.append(f"housing = '{user_housing}'")
+    if user_from_date:
+        conditions.append(f"date_from = '{user_from_date}'")
+    if user_to_date:
+        conditions.append(f"date_to = '{user_to_date}'")
+
+    # Construct the SQL query
+    query = "SELECT * FROM users"
+    if conditions:
+        query += " WHERE " + " AND ".join(conditions)
+
+    # Fetch and display the matching entries
+    entries = return_values_from_database(query)
+    refresh_entries_list(entries)
 
 
 
@@ -212,11 +254,12 @@ housing_option.place(relx = 0.2, rely = 0.8, anchor=ctk.W)
 
 button_data = [
     {"parent": app, "text": "Update entry", "command": update_entry, "relx": 0.8, "rely": 0.4},
-    {"parent": app, "text": "Search entry", "command": print_all, "relx": 0.8, "rely": 0.45},
+    {"parent": app, "text": "(NOT WORK)Search entry", "command": print_all, "relx": 0.8, "rely": 0.45},
     {"parent": app, "text": "View all entries", "command": print_all, "relx": 0.8, "rely": 0.5},
     {"parent": app, "text": "Delete selected entry", "command": delete_entry, "relx": 0.8, "rely": 0.55},
-    #{"parent": frame, "text": "Export to csv", "command": export_csv, "relx": 0.55, "rely": 0.8}, 
-    {"parent": frame, "text": "Book Now", "command": add_to_database, "relx": 0.8, "rely": 0.8}
+    {"parent": app, "text": "Export to csv", "command": export_csv, "relx": 0.005, "rely": 0.05}, 
+    {"parent": frame, "text": "Book Now", "command": add_to_database, "relx": 0.8, "rely": 0.8},
+    {"parent": app, "text": "Clear all fields", "command": clear_fields, "relx": 0.8, "rely": 0.7}
 ]
 
 for data in button_data:
@@ -253,6 +296,13 @@ def on_select(event):
     country_input_field.insert(0, country)
     name_input_field.delete(0, tk.END)
     name_input_field.insert(0, name)
+    if gender == "Male":
+        gender_var.set("Male")
+    elif gender == "Female":
+        gender_var.set("Female")
+    elif gender_var == "Prefer not to say":
+        gender_var.set("NaN")
+    
 
 
 listbox.bind('<<ListboxSelect>>', on_select)
