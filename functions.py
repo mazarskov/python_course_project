@@ -5,6 +5,8 @@ from datetime import datetime
 import mysql.connector
 from pprint import pprint
 from pprint import pformat
+import customtkinter as ctk
+from tkinter import messagebox
 database_config = {
     'host': 'localhost',
     'user': 'root',
@@ -42,7 +44,8 @@ def format_records(records):
         formatted_text += f"\nPassport Number: {record['pass_num']}"
         formatted_text += f"\nHousing: {record['housing']}"
         formatted_text += f"\nDate From: {record['date_from']}"
-        formatted_text += f"\nDate To: {record['date_to']}\n"
+        formatted_text += f"\nDate To: {record['date_to']}"
+        formatted_text += "----------------"
     return formatted_text
 
 def is_valid_date(date_string):
@@ -72,6 +75,7 @@ def append_values_to_database(values, database_config=database_config):
         connection.close()
 
         print("Data appended to the database successfully.")
+        messagebox.showinfo("Data added successfully", "Data added successfully")
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")

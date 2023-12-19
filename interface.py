@@ -29,8 +29,12 @@ def print_all():
     text = generate_text(user_name, user_gender, user_country, user_pass_num, user_housing, user_from_date, user_to_date)
     text2 = return_values_from_database()
     formatted_text = format_records(text2)
-    display_box.insert("0.0", "\n")
-    display_box.insert("0.0", formatted_text)
+    #display_box.insert("0.0", "\n")
+    #display_box.insert("0.0", formatted_text)
+    lines = formatted_text.split('----------------')
+    # Add each line as a separate item
+    for line in lines:
+        listbox.insert(tk.END, line)
 
 
 def export_csv():
@@ -148,9 +152,11 @@ for data in button_data:
 
 
 
-display_box = ctk.CTkTextbox(app, width=500, height=300)
-display_box.place(relx = 0.025, rely = 0.55, anchor=ctk.W)
+#display_box = ctk.CTkTextbox(app, width=500, height=300)
+#display_box.place(relx = 0.025, rely = 0.55, anchor=ctk.W)
 
+listbox = tk.Listbox(app, width=120, height=20)
+listbox.place(relx = 0.005, rely = 0.55, anchor=ctk.W)
 
 gender_var.trace_add('write', update_housing_options)
 app.resizable(False, False)
